@@ -1,210 +1,204 @@
 #include <iostream>
 #include <vector>
-#include <chrono>
 #include <cstdlib>
+#include <ctime>
+#include <chrono>
 
 using namespace std;
 using namespace std::chrono;
 
 // Bubble Sort
-void bubbleSort(vector<int> &arr)
+void bubble(vector<int> &a)
 {
-    int n = arr.size();
+    int size = a.size();
 
-    for (int i = 0; i < n - 1; i++)
+    for (int i = 0; i < size - 1; i++)
     {
-        for (int j = 0; j < n - i - 1; j++)
+        for (int j = 0; j < size - i - 1; j++)
         {
-            if (arr[j] > arr[j + 1])
-                swap(arr[j], arr[j + 1]);
+            if (a[j] > a[j + 1])
+                swap(a[j], a[j + 1]);
         }
     }
 }
 
 // Selection Sort
-void selectionSort(vector<int> &arr)
+void selection(vector<int> &a)
 {
-    int n = arr.size();
+    int size = a.size();
 
-    for (int i = 0; i < n - 1; i++)
+    for (int i = 0; i < size - 1; i++)
     {
-        int minIndex = i;
+        int smallest = i;
 
-        for (int j = i + 1; j < n; j++)
+        for (int j = i + 1; j < size; j++)
         {
-            if (arr[j] < arr[minIndex])
-                minIndex = j;
+            if (a[j] < a[smallest])
+                smallest = j;
         }
 
-        swap(arr[i], arr[minIndex]);
+        swap(a[i], a[smallest]);
     }
 }
 
 // Insertion Sort
-void insertionSort(vector<int> &arr)
+void insertion(vector<int> &a)
 {
-    int n = arr.size();
+    int size = a.size();
 
-    for (int i = 1; i < n; i++)
+    for (int i = 1; i < size; i++)
     {
-        int key = arr[i];
+        int current = a[i];
         int j = i - 1;
 
-        while (j >= 0 && arr[j] > key)
+        while (j >= 0 && a[j] > current)
         {
-            arr[j + 1] = arr[j];
+            a[j + 1] = a[j];
             j--;
         }
 
-        arr[j + 1] = key;
+        a[j + 1] = current;
     }
 }
 
 // Merge Function
-void merge(vector<int> &arr, int left, int mid, int right)
+void mergeArray(vector<int> &a, int left, int mid, int right)
 {
     int n1 = mid - left + 1;
     int n2 = right - mid;
 
-    vector<int> L(n1), R(n2);
+    vector<int> first(n1), second(n2);
 
     for (int i = 0; i < n1; i++)
-        L[i] = arr[left + i];
+        first[i] = a[left + i];
 
     for (int j = 0; j < n2; j++)
-        R[j] = arr[mid + 1 + j];
+        second[j] = a[mid + 1 + j];
 
     int i = 0, j = 0, k = left;
 
     while (i < n1 && j < n2)
     {
-        if (L[i] <= R[j])
-            arr[k++] = L[i++];
+        if (first[i] <= second[j])
+            a[k++] = first[i++];
         else
-            arr[k++] = R[j++];
+            a[k++] = second[j++];
     }
 
     while (i < n1)
-        arr[k++] = L[i++];
+        a[k++] = first[i++];
 
     while (j < n2)
-        arr[k++] = R[j++];
+        a[k++] = second[j++];
 }
 
 // Merge Sort
-void mergeSort(vector<int> &arr, int left, int right)
+void mergeSorting(vector<int> &a, int left, int right)
 {
     if (left < right)
     {
-        int mid = left + (right - left) / 2;
+        int mid = (left + right) / 2;
 
-        mergeSort(arr, left, mid);
-        mergeSort(arr, mid + 1, right);
+        mergeSorting(a, left, mid);
+        mergeSorting(a, mid + 1, right);
 
-        merge(arr, left, mid, right);
+        mergeArray(a, left, mid, right);
     }
 }
 
 // Partition Function
-int partition(vector<int> &arr, int low, int high)
+int divide(vector<int> &a, int low, int high)
 {
-    int pivot = arr[high];
-    int i = low - 1;
+    int pivot = a[high];
+    int index = low - 1;
 
-    for (int j = low; j < high; j++)
+    for (int i = low; i < high; i++)
     {
-        if (arr[j] < pivot)
+        if (a[i] < pivot)
         {
-            i++;
-            swap(arr[i], arr[j]);
+            index++;
+            swap(a[index], a[i]);
         }
     }
 
-    swap(arr[i + 1], arr[high]);
+    swap(a[index + 1], a[high]);
 
-    return i + 1;
+    return index + 1;
 }
 
 // Quick Sort
-void quickSort(vector<int> &arr, int low, int high)
+void quickSorting(vector<int> &a, int low, int high)
 {
     if (low < high)
     {
-        int pi = partition(arr, low, high);
+        int p = divide(a, low, high);
 
-        quickSort(arr, low, pi - 1);
-        quickSort(arr, pi + 1, high);
+        quickSorting(a, low, p - 1);
+        quickSorting(a, p + 1, high);
+    }
+}
+
+// Function to create random array
+void createArray(vector<int> &a)
+{
+    for (int i = 0; i < a.size(); i++)
+    {
+        a[i] = rand() % 1000;
     }
 }
 
 int main()
 {
-    int n = 10000;
+    const int SIZE = 100;
 
-    vector<int> original(n);
+    vector<int> original(SIZE);
+    vector<int> copyArray;
 
-    srand(time(0));
+    srand(time(NULL));
 
-    // Creating random array
-    for (int i = 0; i < n; i++)
-        original[i] = rand() % 100000;
+    createArray(original);
 
-    vector<int> arr;
+    cout << "Array Size : " << SIZE << endl << endl;
 
-    // Bubble Sort Timing
-    arr = original;
     auto start = high_resolution_clock::now();
-    bubbleSort(arr);
-    auto stop = high_resolution_clock::now();
+    copyArray = original;
+    bubble(copyArray);
+    auto end = high_resolution_clock::now();
+    cout << "Bubble Sort      : "
+         << duration_cast<microseconds>(end - start).count()
+         << " microseconds" << endl;
 
-    cout << "\nBubble Sort\n";
-    cout << "Time Taken : "
-         << duration_cast<microseconds>(stop - start).count()
-         << " microseconds\n";
-
-    // Selection Sort Timing
-    arr = original;
     start = high_resolution_clock::now();
-    selectionSort(arr);
-    stop = high_resolution_clock::now();
+    copyArray = original;
+    selection(copyArray);
+    end = high_resolution_clock::now();
+    cout << "Selection Sort   : "
+         << duration_cast<microseconds>(end - start).count()
+         << " microseconds" << endl;
 
-    cout << "\nSelection Sort\n";
-    cout << "Time Taken : "
-         << duration_cast<microseconds>(stop - start).count()
-         << " microseconds\n";
-
-    // Insertion Sort Timing
-    arr = original;
     start = high_resolution_clock::now();
-    insertionSort(arr);
-    stop = high_resolution_clock::now();
+    copyArray = original;
+    insertion(copyArray);
+    end = high_resolution_clock::now();
+    cout << "Insertion Sort   : "
+         << duration_cast<microseconds>(end - start).count()
+         << " microseconds" << endl;
 
-    cout << "\nInsertion Sort\n";
-    cout << "Time Taken : "
-         << duration_cast<microseconds>(stop - start).count()
-         << " microseconds\n";
-
-    // Merge Sort Timing
-    arr = original;
     start = high_resolution_clock::now();
-    mergeSort(arr, 0, n - 1);
-    stop = high_resolution_clock::now();
+    copyArray = original;
+    mergeSorting(copyArray, 0, SIZE - 1);
+    end = high_resolution_clock::now();
+    cout << "Merge Sort       : "
+         << duration_cast<microseconds>(end - start).count()
+         << " microseconds" << endl;
 
-    cout << "\nMerge Sort\n";
-    cout << "Time Taken : "
-         << duration_cast<microseconds>(stop - start).count()
-         << " microseconds\n";
-
-    // Quick Sort Timing
-    arr = original;
     start = high_resolution_clock::now();
-    quickSort(arr, 0, n - 1);
-    stop = high_resolution_clock::now();
-
-    cout << "\nQuick Sort\n";
-    cout << "Time Taken : "
-         << duration_cast<microseconds>(stop - start).count()
-         << " microseconds\n";
+    copyArray = original;
+    quickSorting(copyArray, 0, SIZE - 1);
+    end = high_resolution_clock::now();
+    cout << "Quick Sort       : "
+         << duration_cast<microseconds>(end - start).count()
+         << " microseconds" << endl;
 
     return 0;
 }
