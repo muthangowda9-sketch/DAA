@@ -76,7 +76,7 @@ void minHeapSort(vector<int> &arr)
     for (int i = n - 1; i > 0; i--)
     {
         swap(arr[0], arr[i]);
-        maxHeapify(arr, i, 0);
+        minHeapify(arr, i, 0); // <-- FIXED: Changed from maxHeapify to minHeapify
     }
 
     // Reverse to get ascending order
