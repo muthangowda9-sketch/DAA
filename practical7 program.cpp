@@ -1,101 +1,103 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <climits>
 
-using namespace std;
+struct CoinChangeResult {
+    bool possible;
+    int minCoins;
+    std::vector<int> coinsUsed;
+};
 
 /**
- * Function: coinChange
- * Purpose : Computes minimum coins required and prints the exact coins used.
+ * Computes the minimum number of coins and backtracks the coins used.
  * Algorithm: Bottom-Up Dynamic Programming (Tabulation)
  */
-void coinChange(const vector<int>& coins, int amount)
-{
-    // dp[i] stores the minimum number of coins required for amount i
-    // Initialize with amount + 1 (representing infinity/unreachable)
-    vector<int> dp(amount + 1, amount + 1);
+CoinChangeResult getMinCoins(const std::vector<int>& coins, int amount) {
+    if (amount == 0) {
+        return {true, 0, {}};
+    }
 
-    // coinUsed[i] stores the coin value used to reach the optimal solution for amount i
-    vector<int> coinUsed(amount + 1, -1);
+    // dp[i] stores the minimum coins needed for amount i
+    // coinUsed[i] stores the coin denomination chosen for amount i
+    std::vector<int> dp(amount + 1, INT_MAX);
+    std::vector<int> coinUsed(amount + 1, -1);
 
-    // Base Case: 0 coins needed to make amount 0
+    // Base Case
     dp[0] = 0;
 
-    // Fill the DP table for all sub-amounts from 1 to amount
-    for (int i = 1; i <= amount; i++)
-    {
-        for (int coin : coins)
-        {
-            if (coin <= i)
-            {
-                if (dp[i - coin] + 1 < dp[i])
-                {
+    // Fill DP table
+    for (int i = 1; i <= amount; ++i) {
+        for (int coin : coins) {
+            if (coin <= i && dp[i - coin] != INT_MAX) {
+                if (dp[i - coin] + 1 < dp[i]) {
                     dp[i] = dp[i - coin] + 1;
-                    coinUsed[i] = coin; // Track coin used for backtracking
+                    coinUsed[i] = coin;
                 }
             }
         }
     }
 
-    // Output Header
-    cout << "\n----------------------------------------" << endl;
-    cout << "            PRACTICAL RESULT            " << endl;
-    cout << "----------------------------------------" << endl;
-
-    // If amount cannot be formed
-    if (dp[amount] > amount)
-    {
-        cout << "Result: Change cannot be made with given coins." << endl;
-        cout << "----------------------------------------\n" << endl;
-        return;
+    // If unreachable
+    if (dp[amount] == INT_MAX) {
+        return {false, -1, {}};
     }
 
-    cout << "Minimum number of coins: " << dp[amount] << endl;
-    cout << "Coins used             : ";
-
-    // Backtrack using coinUsed vector to print the chosen coins
-    int currentAmount = amount;
-    while (currentAmount > 0)
-    {
-        int coin = coinUsed[currentAmount];
-        cout << coin << " ";
-        currentAmount -= coin;
+    // Backtrack to reconstruct the combination
+    std::vector<int> chosenCoins;
+    for (int curr = amount; curr > 0; curr -= coinUsed[curr]) {
+        chosenCoins.push_back(coinUsed[curr]);
     }
 
-    cout << "\n----------------------------------------\n" << endl;
+    return {true, dp[amount], chosenCoins};
 }
 
-int main()
-{
-    int n, amount;
+void printResult(const CoinChangeResult& result) {
+    std::cout << "\n----------------------------------------\n";
+    std::cout << "            PRACTICAL RESULT            \n";
+    std::cout << "----------------------------------------\n";
 
-    cout << "========================================" << endl;
-    cout << "  DYNAMIC PROGRAMMING: COIN CHANGE PROBLEM  " << endl;
-    cout << "========================================" << endl;
+    if (!result.possible) {
+        std::cout << "Result: Change cannot be made with given coins.\n";
+    } else {
+        std::cout << "Minimum number of coins: " << result.minCoins << "\n";
+        std::cout << "Coins used             : ";
+        for (int coin : result.coinsUsed) {
+            std::cout << coin << " ";
+        }
+        std::cout << "\n";
+    }
 
-    cout << "Enter number of coin types: ";
-    if (!(cin >> n) || n <= 0)
-    {
-        cout << "Invalid number of coins!" << endl;
+    std::cout << "----------------------------------------\n\n";
+}
+
+int main() {
+    std::cout << "========================================\n";
+    std::cout << "  DYNAMIC PROGRAMMING: COIN CHANGE      \n";
+    std::cout << "========================================\n";
+
+    int n;
+    std::cout << "Enter number of coin types: ";
+    if (!(std::cin >> n) || n <= 0) {
+        std::cerr << "Invalid number of coins!\n";
         return 1;
     }
 
-    vector<int> coins(n);
-    cout << "Enter coin values (space-separated): ";
-    for (int i = 0; i < n; i++)
-    {
-        cin >> coins[i];
+    std::vector<int> coins(n);
+    std::cout << "Enter coin values (space-separated): ";
+    for (int i = 0; i < n; ++i) {
+        std::cin >> coins[i];
     }
 
-    cout << "Enter target amount: ";
-    if (!(cin >> amount) || amount < 0)
-    {
-        cout << "Invalid target amount!" << endl;
+    int amount;
+    std::cout << "Enter target amount: ";
+    if (!(std::cin >> amount) || amount < 0) {
+        std::cerr << "Invalid target amount!\n";
         return 1;
     }
 
-    // Execute Coin Change algorithm
-    coinChange(coins, amount);
+    CoinChangeResult result = getMinCoins(coins, amount);
+    printResult(result);
 
     return 0;
 }
